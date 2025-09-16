@@ -106,6 +106,10 @@ product-hierarchy-classifier/
    variants.py         # deterministic variant_id serialization
    scoring.py          # confidence + evidence (cohesion, axes, sizes)
    pipeline.py         # CLI orchestrator and exporters
+analysis/
+    brand_seller_quality_report.py
+    probe_bundles_min.py
+    products_export_analysis.ipynb
  output/                # created at runtime
     product_groups.json
     variants.json
