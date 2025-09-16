@@ -4,20 +4,20 @@ ML-first system that turns noisy retail feeds into readable product groups, dete
 
 ---
 
-## 📚 Table of Contents
+##  Table of Contents
 
-- [🔭 Overview](#-overview)
-- [🏗️ Architecture](#-architecture)
+- [ Overview](#-overview)
+- [ Architecture](#-architecture)
   - [Module Interaction](#module-interaction-left--right)
   - [Architecture Diagram](#architecture-diagram)
   - [Design Tenets](#design-tenets)
-- [📦 Repository Layout](#-repository-layout)
-- [📥 Input & 📤 Output](#-input--output)
+- [ Repository Layout](#-repository-layout)
+- [ Input &  Output](#-input--output)
   - [Input: CSV Schema](#input-csv-full-schema)
   - [`details` JSON Schema](#details-json-observed-keys-and-handling)
   - [Field Priority & Fallbacks](#field-priority--fallbacks)
   - [Output Artifacts](#output-artifacts-created-in---output)
-- [🧱 Pipeline Architecture](#pipeline-architecture)
+- [Pipeline Architecture](#pipeline-architecture)
   - [`src/loaders.py`](#srcloaderspy)
   - [`src/normalize.py`](#srcnormalizepy)
   - [`src/specs_map.py`](#srcspecs_mappy)
@@ -26,21 +26,21 @@ ML-first system that turns noisy retail feeds into readable product groups, dete
   - [`src/variants.py`](#srcvariantspy)
   - [`src/scoring.py`](#srcscoringpy)
   - [`src/pipeline.py`](#srcpipelinepy)
-- [🚀 Getting Started](#-getting-started)
+- [ Getting Started](#-getting-started)
   - [1) Environment Setup](#1-environment)
   - [2) Run the Pipeline](#2-run-the-pipeline)
-- [📈 Confidence Scoring & Thresholding](#-confidence-scoring--thresholding)
-- [🧪 Final Performance Snapshot](#-final-performance-snapshot)
-- [🧪 Data Quality & Insights](#-data-quality--insights)
-- [🌟 Bonus Challenges](#-bonus-challenges)
+- [Confidence Scoring & Thresholding](#-confidence-scoring--thresholding)
+- [Final Performance Snapshot](#-final-performance-snapshot)
+- [Data Quality & Insights](#-data-quality--insights)
+- [ Bonus Challenges](#-bonus-challenges)
   - [1) ML-Powered Matching](#1-ml-powered-matching-implemented)
   - [2) Bundle Detection](#2-bundle-detection-implemented)
   - [3) Advanced Analysis](#3-advanced-analysis-implemented)
   - [Reviewer Notes](#reviewer-notes)
   - [References (Code & Docs)](#references-code--docs)
-- [🔁 Reproducibility & Determinism](#-reproducibility--determinism)
-- [🛠️ Troubleshooting](#-troubleshooting)
-- [📊 Additional Analysis](#additional-analysis)
+- [ Reproducibility & Determinism](#-reproducibility--determinism)
+- [ Troubleshooting](#-troubleshooting)
+- [ Additional Analysis](#additional-analysis)
   - [Probe Bundles – Minimal Inspector](#probe-bundles--minimal-inspector)
   - [What This Script Does](#what-this-script-does)
   - [Quick Start](#quick-start)
@@ -55,7 +55,7 @@ ML-first system that turns noisy retail feeds into readable product groups, dete
   - [Example: Interpreting a Candidate Row](#example-interpreting-a-candidate-row)
   - [Reproducibility](#reproducibility)
 
-## 🔭 Overview
+##  Overview
 
 **Problem.** Retail catalogs mix duplicates, bundles, inconsistent specs, and uneven text quality. Search, merchandising, and analytics need:
 - **Product groups** (brand + family + optional generation)
@@ -68,7 +68,7 @@ ML-first system that turns noisy retail feeds into readable product groups, dete
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 **Module interaction (left → right):**
 1. `loaders.py` – deep text cleaning + JSON/specs parsing → `ml_text`
@@ -90,32 +90,32 @@ ML-first system that turns noisy retail feeds into readable product groups, dete
 
 ---
 
-## 📦 Repository Layout
+##  Repository Layout
 
 ```
 product-hierarchy-classifier/
-├─ README.md
-├─ requirements.txt
-├─ src/
-│  ├─ __init__.py
-│  ├─ loaders.py          # ingestion + deep text cleaning + ml_text
-│  ├─ normalize.py        # gentle parsers & tokens (GB/TB→GB, inches, color, cpu/gpu, 1440p, brand, slugify)
-│  ├─ specs_map.py        # canonical spec keys (no value parsing)
-│  ├─ extractors.py       # weak-labels + TF-IDF/LogReg → axes inference
-│  ├─ grouping.py         # embedding-based grouping → readable group_id
-│  ├─ variants.py         # deterministic variant_id serialization
-│  ├─ scoring.py          # confidence + evidence (cohesion, axes, sizes)
-│  └─ pipeline.py         # CLI orchestrator and exporters
-└─ output/                # created at runtime
-   ├─ product_groups.json
-   ├─ variants.json
-   ├─ assignments.csv
-   └─ summary.json
+ README.md
+ requirements.txt
+ src/
+   __init__.py
+   loaders.py          # ingestion + deep text cleaning + ml_text
+   normalize.py        # gentle parsers & tokens (GB/TB→GB, inches, color, cpu/gpu, 1440p, brand, slugify)
+   specs_map.py        # canonical spec keys (no value parsing)
+   extractors.py       # weak-labels + TF-IDF/LogReg → axes inference
+   grouping.py         # embedding-based grouping → readable group_id
+   variants.py         # deterministic variant_id serialization
+   scoring.py          # confidence + evidence (cohesion, axes, sizes)
+   pipeline.py         # CLI orchestrator and exporters
+ output/                # created at runtime
+    product_groups.json
+    variants.json
+    assignments.csv
+    summary.json
 ```
 
 ---
 
-## 📥 Input & 📤 Output
+##  Input &  Output
 
 ### Input: CSV (Full Schema)
 
@@ -423,7 +423,7 @@ CLI orchestrator: **load → extract → group → variants → score → export
 - `output/summary.json` — metrics obtained after running the pipeline
 
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### 1) Environment
 
@@ -455,7 +455,7 @@ python -m src.pipeline --input /path/to/products-export.csv --output ./output
 
 ---
 
-## 📈 Confidence Scoring & Thresholding
+## Confidence Scoring & Thresholding
 
 How confidence is computed
 
@@ -483,7 +483,7 @@ How confidence is computed
 
 ---
 
-## 🧪 Final Performance Snapshot
+## Final Performance Snapshot
 
 ```json
 {
@@ -506,7 +506,7 @@ How confidence is computed
 
 ---
 
-## 🧪 Data Quality & Insights
+## Data Quality & Insights
 
 **Common issues handled**
 - Random unicode/control characters, stray backslashes, HTML remnants → normalized in loader.
@@ -525,13 +525,13 @@ How confidence is computed
 
 ---
 
-## 🌟 Bonus Challenges
+##  Bonus Challenges
 
 Optional, production-oriented extensions that complement the core pipeline. Each item links to its code location and summarizes rationale, approach, and integration points.
 
 ---
 
-### 1) ML-Powered Matching (✅ Implemented)
+### 1) ML-Powered Matching ( Implemented)
 
 **Purpose.** Robust product grouping using text embeddings; tolerant to noisy vendor feeds.
 
@@ -548,7 +548,7 @@ Optional, production-oriented extensions that complement the core pipeline. Each
 
 ---
 
-### 2) Bundle Detection (🕓 Implemented)
+### 2) Bundle Detection ( Implemented)
 
 Flag “main item + accessory” kits and multi-packs so variants don’t over-merge.
 
@@ -581,7 +581,7 @@ df = apply_to_axes(df, bundles) # toggles axes.packaging.bundle=True when bundle
 
 ---
 
-### 3) Advanced Analysis (🕓 Implemented)
+### 3) Advanced Analysis ( Implemented)
 
 Brand/seller data-quality scoring and anomaly surfacing to triage vendor issues.
 
@@ -630,7 +630,7 @@ python -m analysis.analysis.brand_seller_quality_report   --input path/to/produc
 
 ---
 
-## 🔁 Reproducibility & Determinism
+##  Reproducibility & Determinism
 
 - Fixed seeds for models and sampling.
 - Sorted processing; stable medoid selection; predictable `-2`, `-3` suffixing.
@@ -638,7 +638,7 @@ python -m analysis.analysis.brand_seller_quality_report   --input path/to/produc
 
 ---
 
-## 🛠️ Troubleshooting
+##  Troubleshooting
 
 - SBERT not installed → pipeline logs warning; TF-IDF path activates automatically.
 - Weird casing/unicode visible → add acronyms/tokens to loader if needed.
@@ -668,7 +668,7 @@ This README documents **`analysis/probe_bundles_min.py`**, a small, dependency-l
 
 3. **Prints a concise preview** of the top candidates, a sample of non-bundles, and the top accessory terms.
 
-> ⚠️ This script is for **inspection & sampling**, not final labeling.
+>  This script is for **inspection & sampling**, not final labeling.
 
 ---
 
