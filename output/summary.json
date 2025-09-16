@@ -1,0 +1,11 @@
+{
+  "total_products": 6529,
+  "total_groups": 1489,
+  "total_variants": 6062,
+  "products_assigned": 6529,
+  "products_unassigned": 0,
+  "average_confidence": 0.8462,
+  "processing_time_seconds": 99.75,
+  "sbert_used": true,
+  "group_threshold": 0.82
+}
