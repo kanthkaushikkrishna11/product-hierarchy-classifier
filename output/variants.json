@@ -1,27 +1,6 @@
 {
   "variants": [
     {
-      "variant_id": "acemagic_15_6_laptop_with_n97/config:16gb_16gb_‎light_gray/size:15.5/silicon:amd_ryzen7_5700u/packaging:bundle",
-      "group_id": "acemagic_15_6_laptop_with_n97",
-      "axes": {
-        "config": {
-          "ram_gb": 16,
-          "storage_gb": 16,
-          "color": "‎light_gray"
-        },
-        "size": {
-          "screen_inches": 15.5
-        },
-        "silicon": {
-          "cpu": "amd_ryzen7_5700u"
-        },
-        "packaging": {
-          "bundle": true
-        }
-      },
-      "product_count": 1
-    },
-    {
       "variant_id": "acemagic_amd_laptop_amd_ryzen_7/config:16gb_512gb_gray/size:15.6/silicon:amd_ryzen7_5700u_amd_radeon_rx/packaging:bundle",
       "group_id": "acemagic_amd_laptop_amd_ryzen_7",
       "axes": {
@@ -120850,6 +120829,27 @@
         },
         "packaging": {
           "condition": "new"
+        }
+      },
+      "product_count": 1
+    },
+        {
+      "variant_id": "acemagic_15_6_laptop_with_n97/config:16gb_16gb_light_gray/size:15.5/silicon:amd_ryzen7_5700u/packaging:bundle",
+      "group_id": "acemagic_15_6_laptop_with_n97",
+      "axes": {
+        "config": {
+          "ram_gb": 16,
+          "storage_gb": 16,
+          "color": "light_gray"
+        },
+        "size": {
+          "screen_inches": 15.5
+        },
+        "silicon": {
+          "cpu": "amd_ryzen7_5700u"
+        },
+        "packaging": {
+          "bundle": true
         }
       },
       "product_count": 1
