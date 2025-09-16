@@ -55,7 +55,7 @@ ML-first system that turns noisy retail feeds into readable product groups, dete
   - [Example: Interpreting a Candidate Row](#example-interpreting-a-candidate-row)
   - [Reproducibility](#reproducibility)
 
-##  Overview
+# Overview
 
 **Problem.** Retail catalogs mix duplicates, bundles, inconsistent specs, and uneven text quality. Search, merchandising, and analytics need:
 - **Product groups** (brand + family + optional generation)
@@ -68,7 +68,7 @@ ML-first system that turns noisy retail feeds into readable product groups, dete
 
 ---
 
-##  Architecture
+# Architecture
 
 **Module interaction (left → right):**
 1. `loaders.py` – deep text cleaning + JSON/specs parsing → `ml_text`
@@ -90,7 +90,7 @@ ML-first system that turns noisy retail feeds into readable product groups, dete
 
 ---
 
-##  Repository Layout
+# Repository Layout
 
 ```
 product-hierarchy-classifier/
@@ -115,7 +115,7 @@ product-hierarchy-classifier/
 
 ---
 
-##  Input &  Output
+# Input &  Output
 
 ### Input: CSV (Full Schema)
 
