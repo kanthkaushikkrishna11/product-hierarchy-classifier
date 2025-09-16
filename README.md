@@ -54,7 +54,6 @@ ML-first system that turns noisy retail feeds into readable product groups, dete
   - [Extending to Production](#extending-to-production)
   - [Example: Interpreting a Candidate Row](#example-interpreting-a-candidate-row)
   - [Reproducibility](#reproducibility)
-  - [Support](#support)
 
 ## 🔭 Overview
 
@@ -612,7 +611,7 @@ python -m analysis.analysis.brand_seller_quality_report   --input path/to/produc
 ### Reviewer Notes
 
 - **Why this matters.** Bundles/multi-packs distort grouping and variant IDs; DQ scoring highlights where low confidence and implausible specs originate (specific brands/sellers).  
-- **Safety valves.** All modules are optional; the main pipeline behavior is unchanged if you skip them.  
+- **Safety valves.** All modules are optional; the main pipeline behavior is unchanged if it is skipped.  
 - **Reproducibility.** Deterministic fallbacks (rule-only paths) and fixed seeds keep outputs stable across runs.
 
 ---
@@ -650,7 +649,7 @@ python -m analysis.analysis.brand_seller_quality_report   --input path/to/produc
 
 ## Probe Bundles – Minimal Inspector
 
-This README documents **`analysis/probe_bundles_min.py`**, a small, dependency-light script to **surface likely bundle listings** and **summarize accessory terms** from your products CSV. It’s designed for **quick dataset triage** before we wire a full bundle-detection module into the main pipeline.
+This README documents **`analysis/probe_bundles_min.py`**, a small, dependency-light script to **surface likely bundle listings** and **summarize accessory terms** from  products CSV. It’s designed for **quick dataset triage** before we wire a full bundle-detection module into the main pipeline.
 
 ---
 
@@ -691,7 +690,7 @@ python analysis/probe_bundles_min.py \
 
 ## Input assumptions
 
-Your CSV should include (or the script will create empty fallbacks):
+ CSV should include (or the script will create empty fallbacks):
 
 - `product_id`
 - `name`
@@ -744,7 +743,7 @@ For each row we compute a **bundle score**:
 - **+2.0** per unique **trigger phrase** matched  
   *(e.g., `with`, `includes`, `bundle`, `combo`, `kit`, `package`, `set`, `w/`, `+` between words, `&`)*
 - **+1.0** per unique **accessory term** matched (capped at 6 per row)  
-  *(e.g., `bag`, `mouse`, `keyboard`, `soundbar`, `sleeve`, `dock` … plus your `--extra-lexicon`)*
+  *(e.g., `bag`, `mouse`, `keyboard`, `soundbar`, `sleeve`, `dock` … plus  `--extra-lexicon`)*
 - **+2.0** per **multipack** match  
   *(e.g., `\b(\d+)[-\s]?(?:pack|pk)\b`, `\bset of (\d+)\b`, `\bx\s?(\d+)\b`)*
 - **+2.0** if **spec hints** appear in `details.specifications`  
@@ -752,7 +751,7 @@ For each row we compute a **bundle score**:
 
 This yields an interpretable score; **higher ⇒ more likely a bundle or multi-pack**.
 
-> Heuristic guidance (adjust after reviewing your data):  
+> Heuristic guidance (adjust after reviewing  data):  
 > • **≥ 4** often reads like a bundle or multi-pack.  
 > • **2–3** are “borderline” (e.g., one trigger + a couple accessories).  
 > • **0–1** are good **non-bundle** candidates.
@@ -769,7 +768,7 @@ This yields an interpretable score; **higher ⇒ more likely a bundle or multi-p
 --extra-lexicon   Comma-separated accessory terms to add at runtime
 ```
 
-**Tip:** Use `--extra-lexicon` to quickly add terms you see in your catalog (e.g., `"stylus,pen,monitor arm,lapdesk"`).
+**Tip:** Use `--extra-lexicon` to quickly add terms that are present in catalog (e.g., `"stylus,pen,monitor arm,lapdesk"`).
 
 ---
 
@@ -792,7 +791,7 @@ This yields an interpretable score; **higher ⇒ more likely a bundle or multi-p
 
 ## Workflow recommendation
 
-1. **Run the script** on your export.  
+1. **Run the script** on  export.  
 2. **Inspect `bundle_candidates.csv`** from the top; mark a few rows as true bundles vs false positives.  
 3. **Open `accessory_term_counts.csv`** and identify strong terms to add via `--extra-lexicon`.  
 4. **Re-run** and repeat until precision is acceptable.  
@@ -809,8 +808,6 @@ This yields an interpretable score; **higher ⇒ more likely a bundle or multi-p
 ---
 
 ## Extending to production
-
-Once you’re happy with the shortlists:
 
 - **Rules approach:** move the refined triggers and lexicon into `bundle_detection.py` with unit tests and deterministic tagging (`bundle_type`, `main_product`, `accessories`).
 - **Model approach:** label 300–800 rows from the candidates/non-bundles and train a lightweight classifier (e.g., TF-IDF + LR) to score bundles more robustly.
@@ -835,8 +832,4 @@ Once you’re happy with the shortlists:
 - Text cleaning uses NFKC normalization, HTML tag stripping, and whitespace squashing for consistent matching.
 
 ---
-
-## Support
-
-If you run into unexpected patterns, share a few **true bundle** and **true non-bundle** examples plus your `accessory_term_counts.csv`. I’ll fold strong terms into the lexicon, adjust weights, and draft the production detector accordingly.
 
