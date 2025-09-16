@@ -125,29 +125,29 @@ Characteristics: noisy text, Unicode artifacts, partial/malformed JSON specs, ve
 
 Types are **expected** types after ingestion; raw values may be strings and will be normalized in `loaders.py`. 
 
-| Column | Type | Required | Used by | Notes |
+| Column | Type  | Used by | Notes |
 |---|---|---:|---|---|
-| `product_id` | string | ✅ | all | Unique row id; emitted in outputs. If missing, fallback to `vendor_sku_id` when configured. |
-| `seller_id` | string | – | analytics (future) | Kept for quality scoring/diagnostics; not used for grouping in v1. |
-| `category` | string | – | grouping / sanity | If blank, derived from `primary_category_path`. |
-| `sub_category` | string | – | grouping / sanity | Used to constrain neighborhoods (e.g., laptops vs TVs). |
-| `name` | string | ✅ | grouping/scoring | Primary title; contributes heavily to `ml_text`. |
-| `brief_description` | string | – | grouping/scoring | Cleaned, HTML-unescaped (e.g., `&nbsp;`), merged into `ml_text`. |
-| `details` | **JSON string** | – | loaders/extractors | Parsed to dict. See **details schema** below. Source of most specs. |
-| `shipping_time` | string | – | – | Free text (e.g., `", Shipping, Arrives Jun 25, Free"`). Currently ignored. |
-| `review_rating` | float | – | analysis (future) | 0–5 scale if present. Not used in grouping. |
-| `reviews` | JSON array or string | – | – | Often `"[]"`. Count can be used for analysis; currently ignored. |
-| `vendor_sku_id` | string | – | ids/joins | External id; stored for traceability. |
-| `data_refreshed_at` | ISO datetime | – | logs/summary | Ingestion freshness; not used in modeling. |
-| `created_at` | ISO datetime | – | analysis (future) | Product creation time. |
-| `is_active` | bool/str | – | analysis (future) | `"TRUE"/"FALSE"` normalized to boolean. We still assign inactive rows. |
-| `out_of_stock` | bool/str | – | analysis (future) | Stock status; not used in grouping. |
-| `updated_at` | ISO datetime | – | logs/summary | Last product update time. |
-| `brand` | string | – | grouping/extractors | Conservatively normalized (`normalize_brand`). If blank, fallback to `details.brand`. |
-| `model` | string | – | metadata | Carried through as metadata only; not used for decisions. |
-| `upc` | string | – | tie-break (future) | Optional unique code; reserved for stricter dedupe. |
-| `category_paths` | JSON array of strings | – | grouping/sanity | Alternative taxonomy paths. Parsed if provided. |
-| `primary_category_path` | string | – | grouping/sanity | Main taxonomy string like `electronics/computers/laptops`.|
+| `product_id` | string | all | Unique row id; emitted in outputs. If missing, fallback to `vendor_sku_id` when configured. |
+| `seller_id` | string | analytics (future) | Kept for quality scoring/diagnostics; not used for grouping in v1. |
+| `category` | string |  grouping / sanity | If blank, derived from `primary_category_path`. |
+| `sub_category` | string |  grouping / sanity | Used to constrain neighborhoods (e.g., laptops vs TVs). |
+| `name` | string | grouping/scoring | Primary title; contributes heavily to `ml_text`. |
+| `brief_description` | string | grouping/scoring | Cleaned, HTML-unescaped (e.g., `&nbsp;`), merged into `ml_text`. |
+| `details` | **JSON string** | loaders/extractors | Parsed to dict. See **details schema** below. Source of most specs. |
+| `shipping_time` | string | – | Free text (e.g., `", Shipping, Arrives Jun 25, Free"`). Currently ignored. |
+| `review_rating` | float |  analysis (future) | 0–5 scale if present. Not used in grouping. |
+| `reviews` | JSON array or string | – |  Often `"[]"`. Count can be used for analysis; currently ignored. |
+| `vendor_sku_id` | string | ids/joins | External id; stored for traceability. |
+| `data_refreshed_at` | ISO datetime | logs/summary | Ingestion freshness; not used in modeling. |
+| `created_at` | ISO datetime |  analysis (future) | Product creation time. |
+| `is_active` | bool/str | analysis (future) | `"TRUE"/"FALSE"` normalized to boolean. We still assign inactive rows. |
+| `out_of_stock` | bool/str |  analysis (future) | Stock status; not used in grouping. |
+| `updated_at` | ISO datetime | logs/summary | Last product update time. |
+| `brand` | string |  grouping/extractors | Conservatively normalized (`normalize_brand`). If blank, fallback to `details.brand`. |
+| `model` | string | metadata | Carried through as metadata only; not used for decisions. |
+| `upc` | string | tie-break (future) | Optional unique code; reserved for stricter dedupe. |
+| `category_paths` | JSON array of strings |grouping/sanity | Alternative taxonomy paths. Parsed if provided. |
+| `primary_category_path` | string | grouping/sanity | Main taxonomy string like `electronics/computers/laptops`.|
 
 **Important ingestion notes**
 
