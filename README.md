@@ -4,6 +4,58 @@ ML-first system that turns noisy retail feeds into readable product groups, dete
 
 ---
 
+## 📚 Table of Contents
+
+- [🔭 Overview](#-overview)
+- [🏗️ Architecture](#-architecture)
+  - [Module Interaction](#module-interaction-left--right)
+  - [Architecture Diagram](#architecture-diagram)
+  - [Design Tenets](#design-tenets)
+- [📦 Repository Layout](#-repository-layout)
+- [📥 Input & 📤 Output](#-input--output)
+  - [Input: CSV Schema](#input-csv-full-schema)
+  - [`details` JSON Schema](#details-json-observed-keys-and-handling)
+  - [Field Priority & Fallbacks](#field-priority--fallbacks)
+  - [Output Artifacts](#output-artifacts-created-in---output)
+- [🧱 Pipeline Architecture](#pipeline-architecture)
+  - [`src/loaders.py`](#srcloaderspy)
+  - [`src/normalize.py`](#srcnormalizepy)
+  - [`src/specs_map.py`](#srcspecs_mappy)
+  - [`src/extractors.py`](#srcextractorspy)
+  - [`src/grouping.py`](#srcgroupingpy)
+  - [`src/variants.py`](#srcvariantspy)
+  - [`src/scoring.py`](#srcscoringpy)
+  - [`src/pipeline.py`](#srcpipelinepy)
+- [🚀 Getting Started](#-getting-started)
+  - [1) Environment Setup](#1-environment)
+  - [2) Run the Pipeline](#2-run-the-pipeline)
+- [📈 Confidence Scoring & Thresholding](#-confidence-scoring--thresholding)
+- [🧪 Final Performance Snapshot](#-final-performance-snapshot)
+- [🧪 Data Quality & Insights](#-data-quality--insights)
+- [🌟 Bonus Challenges](#-bonus-challenges)
+  - [1) ML-Powered Matching](#1-ml-powered-matching-implemented)
+  - [2) Bundle Detection](#2-bundle-detection-implemented)
+  - [3) Advanced Analysis](#3-advanced-analysis-implemented)
+  - [Reviewer Notes](#reviewer-notes)
+  - [References (Code & Docs)](#references-code--docs)
+- [🔁 Reproducibility & Determinism](#-reproducibility--determinism)
+- [🛠️ Troubleshooting](#-troubleshooting)
+- [📊 Additional Analysis](#additional-analysis)
+  - [Probe Bundles – Minimal Inspector](#probe-bundles--minimal-inspector)
+  - [What This Script Does](#what-this-script-does)
+  - [Quick Start](#quick-start)
+  - [Input Assumptions](#input-assumptions)
+  - [Outputs](#outputs)
+  - [Scoring Logic (Transparent)](#scoring-logic-transparent)
+  - [CLI Options](#cli-options)
+  - [What the Evidence Fields Mean](#what-the-evidence-fields-mean)
+  - [Workflow Recommendation](#workflow-recommendation)
+  - [Known Limitations](#known-limitations)
+  - [Extending to Production](#extending-to-production)
+  - [Example: Interpreting a Candidate Row](#example-interpreting-a-candidate-row)
+  - [Reproducibility](#reproducibility)
+  - [Support](#support)
+
 ## 🔭 Overview
 
 **Problem.** Retail catalogs mix duplicates, bundles, inconsistent specs, and uneven text quality. Search, merchandising, and analytics need:
@@ -590,3 +642,200 @@ python -m analysis.analysis.brand_seller_quality_report   --input path/to/produc
 
 - SBERT not installed → pipeline logs warning; TF-IDF path activates automatically.
 - Weird casing/unicode visible → add acronyms/tokens to loader if needed.
+
+
+# ADDITIONAL ANALYSIS
+
+
+## Probe Bundles – Minimal Inspector
+
+This README documents **`analysis/probe_bundles_min.py`**, a small, dependency-light script to **surface likely bundle listings** and **summarize accessory terms** from your products CSV. It’s designed for **quick dataset triage** before we wire a full bundle-detection module into the main pipeline.
+
+---
+
+## What this script does
+
+1. **Scores each row’s “bundle-ness”** using transparent signals:
+   - Trigger phrases: `with`, `includes`, `bundle`, `combo`, `kit`, `package`, `set`, `w/`, `+`, `&`
+   - Accessory lexicon hits: `bag`, `mouse`, `soundbar`, `sleeve`, `dock`, `hub`, `keyboard`, …
+   - Multi-pack patterns: `2-pack`, `3pk`, `set of 2`, `x2`
+   - Spec hints (if present): `Accessories Included`, `Package Contents`, `Included`, `In the Box`
+
+2. **Outputs three CSVs** to an output folder:
+   - `bundle_candidates.csv` – top-N rows by score (with evidence columns)
+   - `non_bundle_sample.csv` – N sampled rows from the **low-score** region
+   - `accessory_term_counts.csv` – frequency table of matched accessory terms
+
+3. **Prints a concise preview** of the top candidates, a sample of non-bundles, and the top accessory terms.
+
+> ⚠️ This script is for **inspection & sampling**, not final labeling. You’ll review the outputs and we’ll then tighten rules or train a classifier.
+
+---
+
+## Quick start
+
+```bash
+# From repo root (ensure pandas is installed)
+python analysis/probe_bundles_min.py \
+  --input path/to/products.csv \
+  --outdir output/probe_min \
+  --top 60 \
+  --sample-non 60 \
+  --extra-lexicon "dock,stylus,stand,pen,sleeve,screen protector"
+```
+
+**Requirements:** Python 3.8+ and `pandas`.
+
+---
+
+## Input assumptions
+
+Your CSV should include (or the script will create empty fallbacks):
+
+- `product_id`
+- `name`
+- `brief_description`
+- `details` (stringified JSON; if present, we read `details["specifications"]`)
+
+Example `details` structure (subset):
+
+```json
+{
+  "brand": "ASUS",
+  "specifications": {
+    "Accessories Included": "Adapter",
+    "Screen Size": "15.6 in",
+    "...": "..."
+  }
+}
+```
+
+---
+
+## Outputs
+
+### 1) `bundle_candidates.csv` (top-N by score)
+
+Columns:
+- `product_id`, `name`, `brief_description`
+- `bundle_score` – numeric score (see formula below)
+- `evidence_triggers` – which bundle phrases matched
+- `evidence_accessories` – accessory terms matched
+- `evidence_multipack` – multipack regex matches (with captured quantities)
+- `evidence_spec_hint` – `true` if spec fields like *Accessories Included* were present
+
+### 2) `non_bundle_sample.csv` (from low-score tail)
+
+Same columns as above; sampled from the **bottom 40%** by score using `random_state=42`.
+
+### 3) `accessory_term_counts.csv`
+
+Two columns:
+- `term` – matched accessory term (normalized)
+- `count` – frequency across all rows
+
+---
+
+## Scoring logic (transparent)
+
+For each row we compute a **bundle score**:
+
+- **+2.0** per unique **trigger phrase** matched  
+  *(e.g., `with`, `includes`, `bundle`, `combo`, `kit`, `package`, `set`, `w/`, `+` between words, `&`)*
+- **+1.0** per unique **accessory term** matched (capped at 6 per row)  
+  *(e.g., `bag`, `mouse`, `keyboard`, `soundbar`, `sleeve`, `dock` … plus your `--extra-lexicon`)*
+- **+2.0** per **multipack** match  
+  *(e.g., `\b(\d+)[-\s]?(?:pack|pk)\b`, `\bset of (\d+)\b`, `\bx\s?(\d+)\b`)*
+- **+2.0** if **spec hints** appear in `details.specifications`  
+  *(any of: `Accessories Included`, `Package Contents`, `Included`, `In the Box`)*
+
+This yields an interpretable score; **higher ⇒ more likely a bundle or multi-pack**.
+
+> Heuristic guidance (adjust after reviewing your data):  
+> • **≥ 4** often reads like a bundle or multi-pack.  
+> • **2–3** are “borderline” (e.g., one trigger + a couple accessories).  
+> • **0–1** are good **non-bundle** candidates.
+
+---
+
+## CLI options
+
+```text
+--input           Path to products CSV (required)
+--outdir          Output directory for CSVs (required)
+--top             How many bundle candidates to keep (default: 50)
+--sample-non      How many non-bundles to sample (default: 50)
+--extra-lexicon   Comma-separated accessory terms to add at runtime
+```
+
+**Tip:** Use `--extra-lexicon` to quickly add terms you see in your catalog (e.g., `"stylus,pen,monitor arm,lapdesk"`).
+
+---
+
+## What the evidence fields mean
+
+- **evidence_triggers**  
+  Phrases or symbols that imply composition: `with`, `includes`, `combo`, `kit`, `package`, `set`, `w/`, `+`, `&`.
+  *Note:* `+` is only counted when it appears **between word characters** (`\w + \w`) to avoid math-like noise.
+
+- **evidence_accessories**  
+  Normalized terms from the accessory lexicon that appear in the title/description/spec hints (whole-word matches; handles bigrams like `mouse pad`).
+
+- **evidence_multipack**  
+  Multipack patterns captured with the matched quantity (e.g., `(\d+)[- ]?(pack|pk)`, `set of (\d+)`, `x(\d+)`).
+
+- **evidence_spec_hint**  
+  `true` if any of these spec keys exist: `Accessories Included`, `Package Contents`, `Included`, `In the Box`.
+
+---
+
+## Workflow recommendation
+
+1. **Run the script** on your export.  
+2. **Inspect `bundle_candidates.csv`** from the top; mark a few rows as true bundles vs false positives.  
+3. **Open `accessory_term_counts.csv`** and identify strong terms to add via `--extra-lexicon`.  
+4. **Re-run** and repeat until precision is acceptable.  
+5. Share the shortlists; we’ll convert validated rules into a production `bundle_detection.py`, or train a small classifier seeded by these weak labels.
+
+---
+
+## Known limitations
+
+- Heuristic triggers may flag legitimate single-SKU products containing words like **“set”** (“TV set”), or **“with”** in marketing copy. Manual review of the top list is expected.
+- Accuracy depends on the **quality of titles/specs**. If accessories are only visible in images, heuristics won’t see them.
+- The script doesn’t alter variant IDs or grouping; it’s **exploratory**.
+
+---
+
+## Extending to production
+
+Once you’re happy with the shortlists:
+
+- **Rules approach:** move the refined triggers and lexicon into `bundle_detection.py` with unit tests and deterministic tagging (`bundle_type`, `main_product`, `accessories`).
+- **Model approach:** label 300–800 rows from the candidates/non-bundles and train a lightweight classifier (e.g., TF-IDF + LR) to score bundles more robustly.
+
+---
+
+## Example: interpreting a candidate row
+
+- `bundle_score = 7.0`  
+- `evidence_triggers = "with, +"`  
+- `evidence_accessories = "soundbar, remote"`  
+- `evidence_multipack = ""`  
+- `evidence_spec_hint = true`
+
+**Interpretation:** Title mentions *with* or uses `+` between items; accessories like `soundbar` and `remote` are present; specs include a “what’s in the box” field. This is a **strong bundle**.
+
+---
+
+## Reproducibility
+
+- **Non-bundle sampling** uses `random_state=42`.  
+- Text cleaning uses NFKC normalization, HTML tag stripping, and whitespace squashing for consistent matching.
+
+---
+
+## Support
+
+If you run into unexpected patterns, share a few **true bundle** and **true non-bundle** examples plus your `accessory_term_counts.csv`. I’ll fold strong terms into the lexicon, adjust weights, and draft the production detector accordingly.
+
