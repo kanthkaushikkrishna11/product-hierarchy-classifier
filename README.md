@@ -470,15 +470,15 @@ How confidence is computed
 **Default score** = deterministic weighted sigmoid; optional LR calibrator can learn weights from labels.
 
 **`group_threshold = 0.82` (grouping).**
-  •	Where applied: cosine radius neighbors on embeddings within brand/sub/size blocks; components become groups.
-  •	Why 0.82: tuned to balance precision/recall over validation batches for laptops and TVs:
-  •	Lowers over-grouping risk (families don’t collapse together),
-  •	Maintains high coverage (few isolated singles),
-  •	Empirically supports average confidence ≈ 0.8463.
-  •	Changing the threshold:
-  •	Higher → stricter grouping (more groups, fewer members/group),
-  •	Lower → looser grouping (risk of merging families).
-  •	Fallback: Even when embeddings fall back to TF-IDF, the same thresholding logic applies; blocks protect against catastrophic merges.
+-	Where applied: cosine radius neighbors on embeddings within brand/sub/size blocks; components become groups.
+-	Why 0.82: tuned to balance precision/recall over validation batches for laptops and TVs:
+-	Lowers over-grouping risk (families don’t collapse together),
+-	Maintains high coverage (few isolated singles),
+-	Empirically supports average confidence ≈ 0.8463.
+-	Changing the threshold:
+-	Higher → stricter grouping (more groups, fewer members/group),
+-	Lower → looser grouping (risk of merging families).
+-	Fallback: Even when embeddings fall back to TF-IDF, the same thresholding logic applies; blocks protect against catastrophic merges.
 
 
 ---
