@@ -622,6 +622,7 @@ python -m analysis.analysis.brand_seller_quality_report   --input path/to/produc
 - Grouping (embeddings + radius graph): [`src/grouping.py`](src/grouping.py)  
 - Bundle detection: [`src/bundle_detection.py`](src/bundle_detection.py)  
 - Advanced analysis report: [`analysis/analysis.brand_seller_quality_report.py`](analysis/analysis.brand_seller_quality_report.py)  
+- Probe Bundles – Minimal Inspector: [`analysis/analysis.probe_bundles_min.py`](analysis/analysis.probe_bundles_min.py)  
 - (Optional) Exploratory notebooks: `notebooks/` (pattern mining, data statistics)
 
 ---
@@ -668,7 +669,7 @@ This README documents **`analysis/probe_bundles_min.py`**, a small, dependency-l
 
 3. **Prints a concise preview** of the top candidates, a sample of non-bundles, and the top accessory terms.
 
-> ⚠️ This script is for **inspection & sampling**, not final labeling. You’ll review the outputs and we’ll then tighten rules or train a classifier.
+> ⚠️ This script is for **inspection & sampling**, not final labeling.
 
 ---
 
